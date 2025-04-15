@@ -45,7 +45,7 @@ The server provides the following tools:
 
 4. Run the server:
    ```bash
-   node dist/src/index.js
+   node dist/index.js
    ```
 
 ### Environment Variables
