@@ -65,55 +65,53 @@ class ThinkToolSession {
 // Singleton session for now (can be extended for per-user/session state)
 const session = new ThinkToolSession();
 
-export const thinkTool = {
-  name: "think-tool",
-  tools: [
-    {
-      name: "think",
-      description:
-        "Use this tool to think about something. It will not obtain new information or change anything, but just append the thought to the log. Use it when complex reasoning or cache memory is needed.\n\nArgs:\n    thought: A thought to think about. This can be structured reasoning, step-by-step analysis, policy verification, or any other mental process that helps with problem-solving, with a strict requirement to record the source URL immediately after each piece of evidence that could be used as a reference citation for the final action.",
-      parameters: {
-        type: "object",
-        properties: {
-          thought: {
-            type: "string",
-            description:
-              "A thought to think about. This can be structured reasoning, step-by-step analysis, policy verification, or any other mental process that helps with problem-solving, with a strict requirement to record the source URL immediately after each piece of evidence that could be used as a reference citation for the final action.",
-          },
+export const thinkTools = [
+  {
+    name: "think",
+    description:
+      "Use this tool to think about something. It will not obtain new information or change anything, but just append the thought to the log. Use it when complex reasoning or cache memory is needed.\n\nArgs:\n    thought: A thought to think about. This can be structured reasoning, step-by-step analysis, policy verification, or any other mental process that helps with problem-solving, with a strict requirement to record the source URL immediately after each piece of evidence that could be used as a reference citation for the final action.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        thought: {
+          type: "string",
+          description:
+            "A thought to think about. This can be structured reasoning, step-by-step analysis, policy verification, or any other mental process that helps with problem-solving, with a strict requirement to record the source URL immediately after each piece of evidence that could be used as a reference citation for the final action.",
         },
-        required: ["thought"],
       },
-      handler: async (args: Record<string, unknown>) => {
-        const thought = typeof args.thought === "string" ? args.thought : "";
-        return session.think(thought);
-      },
+      required: ["thought"],
     },
-    {
-      name: "get_thoughts",
-      description:
-        "Retrieve all thoughts recorded in the current session.\n\nThis tool helps review the thinking process that has occurred so far.",
-      parameters: { type: "object", properties: {}, required: [] },
-      handler: async (_args: Record<string, unknown>) => {
-        return session.get_thoughts();
-      },
-    },
-    {
-      name: "clear_thoughts",
-      description:
-        "Clear all recorded thoughts from the current session.\n\nUse this to start fresh if the thinking process needs to be reset.",
-      parameters: { type: "object", properties: {}, required: [] },
-      handler: async (_args: Record<string, unknown>) => {
-        return session.clear_thoughts();
-      },
-    },
-    {
-      name: "get_thought_stats",
-      description:
-        "Get statistics about the thoughts recorded in the current session.",
-      parameters: { type: "object", properties: {}, required: [] },
-      handler: async (_args: Record<string, unknown>) => {
-        return session.get_thought_stats();
-      },
-    },
-  ],
+  },
+  {
+    name: "get_thoughts",
+    description:
+      "Retrieve all thoughts recorded in the current session.\n\nThis tool helps review the thinking process that has occurred so far.",
+    inputSchema: { type: "object", properties: {}, required: [] },
+  },
+  {
+    name: "clear_thoughts",
+    description:
+      "Clear all recorded thoughts from the current session.\n\nUse this to start fresh if the thinking process needs to be reset.",
+    inputSchema: { type: "object", properties: {}, required: [] },
+  },
+  {
+    name: "get_thought_stats",
+    description:
+      "Get statistics about the thoughts recorded in the current session.",
+    inputSchema: { type: "object", properties: {}, required: [] },
+  },
+];
+
+// Tool handler mapping
+export const thinkToolHandlers: Record<
+  string,
+  (args: Record<string, unknown>) => Promise<string>
+> = {
+  think: async (args) => {
+    const thought = typeof args.thought === "string" ? args.thought : "";
+    return session.think(thought);
+  },
+  get_thoughts: async () => session.get_thoughts(),
+  clear_thoughts: async () => session.clear_thoughts(),
+  get_thought_stats: async () => session.get_thought_stats(),
 };

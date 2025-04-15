@@ -6,10 +6,10 @@ import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
-import { thinkTool } from "./tools/thinkTool";
+import { thinkTools, thinkToolHandlers } from "./tools/thinkTool";
 
 // Register all tools
-const allTools = thinkTool.tools;
+const allTools = thinkTools;
 
 async function main() {
   console.error("Starting Think Tool MCP Server...");
@@ -30,19 +30,16 @@ async function main() {
     CallToolRequestSchema,
     async (request: CallToolRequest) => {
       try {
-        const tool = allTools.find((t) => t.name === request.params.name);
+        const tool = allTools.find((t: any) => t.name === request.params.name);
         if (!tool) {
           throw new Error(`Tool not found: ${request.params.name}`);
         }
-        // Ensure required arguments for "think"
-        let args = request.params.arguments || {};
-        if (tool.name === "think") {
-          if (typeof args.thought !== "string") {
-            throw new Error('Missing required argument: "thought"');
-          }
-          args = { thought: args.thought };
+        const handler = thinkToolHandlers[tool.name];
+        if (!handler) {
+          throw new Error(`No handler registered for tool: ${tool.name}`);
         }
-        const result = await tool.handler(args);
+        const args = request.params.arguments || {};
+        const result = await handler(args);
         return {
           content: [{ type: "text", text: JSON.stringify(result) }],
         };
