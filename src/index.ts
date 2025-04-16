@@ -6,13 +6,10 @@ import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
-import { thinkTools, thinkToolHandlers } from "./tools/thinkTool";
-
-// Register all tools
-const allTools = thinkTools;
+import { thinkTool, thinkHandler } from "./tools/thinkTool"; // Updated import
 
 async function main() {
-  console.error("Starting Think Tool MCP Server...");
+  console.error("Starting Simplified Think Tool MCP Server..."); // Updated name
   const server = new Server(
     {
       name: "Think Tool MCP Server",
@@ -30,16 +27,13 @@ async function main() {
     CallToolRequestSchema,
     async (request: CallToolRequest) => {
       try {
-        const tool = allTools.find((t: any) => t.name === request.params.name);
-        if (!tool) {
-          throw new Error(`Tool not found: ${request.params.name}`);
+        // Only handle the 'think' tool
+        if (request.params.name !== thinkTool.name) {
+          throw new Error(`Unsupported tool: ${request.params.name}. Only '${thinkTool.name}' is available.`);
         }
-        const handler = thinkToolHandlers[tool.name];
-        if (!handler) {
-          throw new Error(`No handler registered for tool: ${tool.name}`);
-        }
+        
         const args = request.params.arguments || {};
-        const result = await handler(args);
+        const result = await thinkHandler(args); // Directly call the handler
         return {
           content: [{ type: "text", text: JSON.stringify(result) }],
         };
@@ -58,17 +52,17 @@ async function main() {
     },
   );
 
-  // Register tool listing handler
+  // Register tool listing handler - only list the 'think' tool
   server.setRequestHandler(ListToolsRequestSchema, async () => {
     return {
-      tools: allTools,
+      tools: [thinkTool], // Return only the single tool definition
     };
   });
 
   const transport = new StdioServerTransport();
   await server.connect(transport);
 
-  console.error("Think Tool MCP Server running on stdio");
+  console.error("Simplified Think Tool MCP Server running on stdio"); // Updated name
 }
 
 main().catch((error) => {

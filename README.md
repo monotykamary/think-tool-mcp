@@ -1,27 +1,33 @@
-# Think Tool MCP Server
+# Think Tool MCP Server (Simplified)
 
-A Model Context Protocol (MCP) server for logging, reviewing, and managing thoughts. This server exposes a single tool suite for structured reasoning, step-by-step analysis, and thought management—ideal for AI agents needing to log and review their internal reasoning.
+A Model Context Protocol (MCP) server implementing the `think` tool as described by [Anthropic](https://www.anthropic.com/engineering/claude-think-tool). This server provides a dedicated space for an AI agent to perform structured thinking during complex tasks, improving reasoning and decision-making.
 
 ## Overview
 
-This MCP server provides tools to log thoughts, review the thinking process, clear the log, and get statistics about the session's thoughts. It is designed for use with Claude Desktop or any MCP-compatible client.
+This simplified MCP server provides only the `think` tool. It allows an AI agent to log its reasoning process without affecting external state or retrieving new information. This implementation is based on the concept outlined in Anthropic's engineering blog post on enhancing agentic tool use. This specific think tool uses the adapted SWE-Bench version.
 
-## Available Tools
+It is designed for use with Claude Desktop or any MCP-compatible client.
 
-The server provides the following tools:
+## Available Tool
 
-1. **think**: Log a thought (with timestamp) to the session.
+The server provides the following tool:
+
+1. **think**: Use the tool to think about something. It will not obtain new information or make any changes to the repository, but just log the thought. Use it when complex reasoning or brainstorming is needed.
    - Parameters:
-     - `thought` (required): The thought to log. Should include structured reasoning, step-by-step analysis, or any mental process. Strictly record the source URL after each piece of evidence for citation.
-
-2. **get_thoughts**: Retrieve all recorded thoughts in the session.
-   - Parameters: None
-
-3. **clear_thoughts**: Clear the session's thought log.
-   - Parameters: None
-
-4. **get_thought_stats**: Get statistics about the thoughts recorded in the session.
-   - Parameters: None
+     - `thought` (required, string): A thought to think about.
+   - Input Schema:
+     ```json
+     {
+       "type": "object",
+       "properties": {
+         "thought": {
+           "type": "string",
+           "description": "Your thoughts."
+         }
+       },
+       "required": ["thought"]
+     }
+     ```
 
 ## Setup
 
@@ -89,36 +95,24 @@ With this configuration:
 2. The MCP server will be available for logging and reviewing thoughts.
 3. The container will be removed when Claude Desktop is closed.
 
-## Usage Examples
+## Usage Example
 
-### Example 1: Logging a Thought
+### Logging a Thought
 
-```
-mcp_think(thought="I should check the latest research on MCP servers. https://example.com/mcp-paper")
-```
-
-### Example 2: Retrieving All Thoughts
-
-```
-mcp_get_thoughts()
-```
-
-### Example 3: Clearing the Thought Log
-
-```
-mcp_clear_thoughts()
-```
-
-### Example 4: Getting Thought Statistics
-
-```
-mcp_get_thought_stats()
+```json
+// Example MCP Tool Call
+{
+  "tool_name": "think",
+  "arguments": {
+    "thought": "Okay, the user wants to refactor the database schema. First, I need to analyze the current schema (using get_schema tool), then identify potential improvements like normalization or indexing. After that, I'll propose a new schema and ask for confirmation before generating the migration script."
+  }
+}
 ```
 
 ## Troubleshooting
 
-- **No Thoughts Recorded**: If you retrieve thoughts before logging any, you'll get a message indicating no thoughts have been recorded.
-- **Session State**: The thought log is stored in memory and will reset if the server restarts.
+- **Server Connection**: Ensure the server is running (locally or via Docker) and configured correctly in your MCP client (e.g., Claude Desktop settings).
+- **Tool Name**: Verify you are calling the tool named `think`.
 
 ## License
 
